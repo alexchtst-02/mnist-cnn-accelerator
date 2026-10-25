@@ -1,3 +1,5 @@
+`timescale 1ns / 1ps
+
 module burst_2_data #(
     parameter integer DATA_WIDTH = 24
 )(

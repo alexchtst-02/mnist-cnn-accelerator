@@ -71,10 +71,6 @@ module cnn_accelerator(
     wire [7:0] pixel_data = din;
     wire valid_pixel_data = valid_in;
     
-    wire enable_next_read_gff;
-    wire valid_out_gff;
-    wire [7:0] dout_gff;
-
     group_feature_fifo #(
         .WORD_WIDTH(8),
         .DEPTH(1024),
