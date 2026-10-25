@@ -69,10 +69,10 @@ The memory-file and log-file paths are relative to the simulator's working direc
 The **verifications** folder holds the Python reference flow and the data used to compare it with RTL simulation.
 
 - **python/data/mnist/** contains the MNIST CSV data. **image-gen.ipynb** selects 100 test images per class and produces 8-bit hexadecimal **.mem** files, including the 1,000-image **img_test.mem** stream used by **tb_accuracy_check.v**.
-- **python/params/** contains the exported floating-point model and configuration. **param-gen.ipynb** converts convolution and fully connected parameters to signed Q2.14, packs them into 16-bit ROM words, and generates the Conv and FC memory files.
+- **python/params/** contains the exported floating-point parameters and configuration of the CNN trained on the MNIST training dataset. The Python model reaches **96.6% (≈97%)** accuracy on the 1,000-image MNIST test subset used by **all_check.ipynb**. **param-gen.ipynb** converts the convolution and fully connected parameters to signed Q2.14, packs them into 16-bit ROM words, and generates the Conv and FC memory files.
 - **python/evaluations/all_check.ipynb** is the reference and comparison notebook. It rebuilds the CNN in NumPy, reconstructs simulation output into feature maps, compares raw and requantized values per stage, plots channel statistics, and checks argmax results against both the Python model and MNIST labels.
 - **python/evaluations/sim-txt/** stores the logs read by the notebook: convolution raw/requantized values, pooling outputs, fully connected outputs, and **argmax_prediction.txt**.
-- **synthetis/** is intentionally empty for now. It is reserved for synthesis and implementation reports/logs produced from this RTL. The directory name keeps the repository's existing spelling.
+- **synthetis/** contains the Vivado synthesis, placement, routing, clock-utilization, and power reports, together with summary images. The directory name keeps the repository's existing spelling.
 
 ### XDC
 
@@ -90,6 +90,45 @@ The **xdc** folder contains FPGA constraints (Board ARTY 7 100). At the moment, 
 The current accelerator top level has **clk** and **rstn**, but it does not expose the four LED ports. Before implementation, either use a wrapper that drives the LEDs or update **base.xdc** to match the selected top level.
 
 ## Result
+
+The design was synthesized, placed, and routed in **Vivado 2025.2** for **xc7a100tcsg324-1** with a **100 MHz** clock constraint.
+
+The **100.0%** result means every hardware argmax prediction matched the Python reference in [**all_check.ipynb**](verifications/python/evaluations/all_check.ipynb#argmax-results-accuracy). It measures agreement with the reference calculation, not accuracy against the MNIST ground-truth labels.
+
+### STA
+
+| WNS | TNS | WHS | THS | TPWS |
+| --- | --- | --- | --- | --- |
+| +0.684 ns | 0.000 ns | +0.010 ns | 0.000 ns | 0.000 ns |
+
+The design meets the 100 MHz timing constraint.
+
+### Resource Utilization
+
+| Resource | Used | Available | Utilization |
+| --- | ---: | ---: | ---: |
+| LUT | 21,241 | 63,400 | 33.50% |
+| FF | 69,228 | 126,800 | 54.60% |
+| BRAM | 57.5 | 135 | 42.59% |
+| DSP | 232 | 240 | 96.67% |
+| IO | 17 | 210 | 8.10% |
+| BUFG | 1 | 32 | 3.13% |
+
+### On-Chip Power
+
+| Category | Power | Percentage |
+| --- | ---: | ---: |
+| Total on-chip power | 1.060 W | 100% |
+| Dynamic power | 0.962 W | 91% of total |
+| Clocks | 0.139 W | 14% of dynamic |
+| Signals | 0.316 W | 33% of dynamic |
+| Logic | 0.151 W | 16% of dynamic |
+| BRAM | 0.157 W | 16% of dynamic |
+| DSP | 0.200 W | 21% of dynamic |
+| I/O | <0.001 W | 0% of dynamic |
+| Device static power | 0.097 W | 9% of total |
+
+At an ambient temperature of 25 °C, Vivado estimates a junction temperature of **29.8 °C**. The power estimate has **Low** confidence because it was generated without a simulation activity file.
 
 ## Limitations
 
