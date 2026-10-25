@@ -6,6 +6,8 @@ This project is a streaming, fixed-point RTL accelerator for MNIST digit classif
 
 The network uses valid 3×3 convolutions with stride 1, 2×2 max pooling with stride 2, ReLU, and requantization after each convolution and fully connected stage. The final result comes from an argmax over ten class scores, so the RTL does not need a softmax unit.
 
+![Pipeline occupancy](assets/pipeline_occupancy.gif)
+
 | Stage | Output shape |
 | --- | --- |
 | Input | 28×28×1 |
