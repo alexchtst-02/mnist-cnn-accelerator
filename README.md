@@ -118,7 +118,6 @@ The design meets the 100 MHz timing constraint.
 
 | Category | Power | Percentage |
 | --- | ---: | ---: |
-| Total on-chip power | 1.060 W | 100% |
 | Dynamic power | 0.962 W | 91% of total |
 | Clocks | 0.139 W | 14% of dynamic |
 | Signals | 0.316 W | 33% of dynamic |
@@ -127,10 +126,19 @@ The design meets the 100 MHz timing constraint.
 | DSP | 0.200 W | 21% of dynamic |
 | I/O | <0.001 W | 0% of dynamic |
 | Device static power | 0.097 W | 9% of total |
+| Total On-Chip Power | 1.060 W |  |
 
 At an ambient temperature of 25 °C, Vivado estimates a junction temperature of **29.8 °C**. The power estimate has **Low** confidence because it was generated without a simulation activity file.
 
 ## Limitations
+
+This version puts latency first, so it is not especially resource-efficient. It uses a fair amount of BRAM, and some DSP capacity can still sit idle between operations even though overall DSP usage is already close to the device limit.
+
+The quantization flow can also be improved. An Int8 approach may be a better fit than the current fixed-point format. The 24-bit Q10.14 activation range still leaves room to tune the thresholds further, as shown in [**all_check.ipynb**](verifications/python/evaluations/all_check.ipynb).
+
+The current design can process a 28×28 image in about **`19 µs`**, within the **`22 µs`** target. There is still plenty of room to optimize the pipeline and explore more efficient trade-offs.
+
+If you would like to discuss the design or need more technical details, feel free to get in touch.
 
 ## Contact
 
